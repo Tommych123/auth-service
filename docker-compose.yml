@@ -1,0 +1,40 @@
+services:
+  auth_service:
+    build: .
+    depends_on:
+      - db
+      - migrate
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: pavelmiltsev
+      POSTGRES_PASSWORD: 12345
+      POSTGRES_DB: authdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+  migrate:
+    image: postgres:15
+    depends_on:
+      - db
+    volumes:
+      - ./scripts:/scripts
+    environment:
+      PGPASSWORD: 12345
+    entrypoint: >
+      sh -c "
+      echo Waiting for database... &&
+      until pg_isready -h db -p 5432; do sleep 1; done &&
+      echo Running migrations... &&
+      psql -h db -U pavelmiltsev -d authdb -f /scripts/migrate.sql
+      "
+
+volumes:
+  db-data:
