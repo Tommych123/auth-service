@@ -1,3 +1,10 @@
+// @title Auth Service API
+// @version 1.0
+// @description Auth microservice for token generation, refreshing, user identity and logout
+// @host localhost:8080
+// @BasePath /
+// @schemes http
+
 package main
 
 import (
@@ -7,6 +14,9 @@ import (
 	"github.com/Tommych123/auth-service/internal/auth"
 	"github.com/Tommych123/auth-service/internal/config"
 	"github.com/Tommych123/auth-service/internal/db"
+	"github.com/swaggo/http-swagger"
+	_ "github.com/Tommych123/auth-service/cmd/docs"
+    _ "github.com/Tommych123/auth-service/internal/auth"
 )
 
 func main() {
@@ -22,6 +32,8 @@ func main() {
 	http.HandleFunc("/refresh", handler.Refresh)   // POST { user_id, refresh_token }
 	http.HandleFunc("/me", handler.Me)             // GET with token
 	http.HandleFunc("/logout", handler.Logout)     // POST with token
+
+	http.Handle("/swagger/", httpSwagger.WrapHandler)
 
 	addr := fmt.Sprintf(":%s", cfg.Port)
 	log.Println("Server started at http://localhost" + addr)

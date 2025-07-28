@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
 	"time"
@@ -27,28 +28,50 @@ func NewService(repository *Repository, jwtSecret string, webhookURL string) *Se
 	}
 }
 
+// GenerateTokens создает пару access и refresh токенов, сохраняет refresh токен с хэшем и привязывает tokenID (jti)
 func (s *Service) GenerateTokens(ctx context.Context, userID, userAgent, ip string) (string, string, error) {
-	accessToken, err := s.generateAccessToken(userID)
+	tokenID := uuid.New().String()
+
+	accessToken, err := s.generateAccessToken(userID, tokenID)
 	if err != nil {
-		return "", "", fmt.Errorf("error(GenerateTokens):generate access token: %w", err)
+		return "", "", fmt.Errorf("error(GenerateTokens): generate access token: %w", err)
 	}
 
 	refreshToken, err := generateRandomBase64(32)
 	if err != nil {
-		return "", "", fmt.Errorf("error(GenerateTokens):generate refresh token: %w", err)
+		return "", "", fmt.Errorf("error(GenerateTokens): generate refresh token: %w", err)
 	}
 
 	hashedToken, err := bcrypt.GenerateFromPassword([]byte(refreshToken), bcrypt.DefaultCost)
 	if err != nil {
-		return "", "", fmt.Errorf("error(GenerateTokens):hash refresh token: %w", err)
+		return "", "", fmt.Errorf("error(GenerateTokens): hash refresh token: %w", err)
 	}
 
 	expiresAt := time.Now().Add(7 * 24 * time.Hour)
-	if err := s.repository.SaveRefreshToken(ctx, userID, string(hashedToken), userAgent, ip, expiresAt); err != nil {
-		return "", "", fmt.Errorf("error(GenerateTokens):save refresh token: %w", err)
+	if err := s.repository.SaveRefreshToken(ctx, userID, string(hashedToken), userAgent, ip, expiresAt, tokenID); err != nil {
+		return "", "", fmt.Errorf("error(GenerateTokens): save refresh token: %w", err)
 	}
 
 	return accessToken, refreshToken, nil
+}
+
+func (s *Service) generateAccessToken(userID, tokenID string) (string, error) {
+	claims := jwt.MapClaims{
+		"user_id": userID,
+		"jti":     tokenID,
+		"exp":     time.Now().Add(10 * time.Minute).Unix(),
+		"iat":     time.Now().Unix(),
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS512, claims)
+	return token.SignedString([]byte(s.jwtSecret))
+}
+
+func generateRandomBase64(n int) (string, error) {
+	b := make([]byte, n)
+	if _, err := rand.Read(b); err != nil {
+		return "", fmt.Errorf("error(generateRandomBase64): rand read failed: %w", err)
+	}
+	return base64.StdEncoding.EncodeToString(b), nil
 }
 
 func (s *Service) GetUserIDFromToken(tokenStr string) (string, error) {
@@ -72,58 +95,36 @@ func (s *Service) GetUserIDFromToken(tokenStr string) (string, error) {
 	return userID, nil
 }
 
-func (s *Service) generateAccessToken(userID string) (string, error) {
-	claims := jwt.MapClaims{
-		"user_id": userID,
-		"exp":     time.Now().Add(10 * time.Minute).Unix(),
-		"iat":     time.Now().Unix(),
-	}
-	token := jwt.NewWithClaims(jwt.SigningMethodHS512, claims)
-	return token.SignedString([]byte(s.jwtSecret))
-}
-
-func generateRandomBase64(n int) (string, error) {
-	b := make([]byte, n)
-	if _, err := rand.Read(b); err != nil {
-		return "", fmt.Errorf("error(generateRandomBase64):rand is fail: %w", err)
-	}
-	return base64.StdEncoding.EncodeToString(b), nil
-}
-
 func (s *Service) RefreshTokens(ctx context.Context, oldRefreshToken, userID, userAgent, ip string) (string, string, error) {
 	tokens, err := s.repository.GetRefreshTokensByUser(ctx, userID)
 	if err != nil {
-		return "", "", fmt.Errorf("error(RefreshTokens):rand is fail: %w", err)
+		return "", "", fmt.Errorf("error(RefreshTokens): get tokens failed: %w", err)
 	}
-	fmt.Printf("Tokens in DB for user %s:\n", userID)
-	for _, token := range tokens {
-		fmt.Printf("- TokenHash: %s, Used: %v, ExpiresAt: %v, UserAgent: %s, IP: %s\n", token.TokenHash, token.Used, token.ExpiresAt, token.UserAgent, token.IPAddress)
-	}
-
-	var needToken *RefreshToken
+	var matchedToken *RefreshToken
 	for _, token := range tokens {
 		if bcrypt.CompareHashAndPassword([]byte(token.TokenHash), []byte(oldRefreshToken)) == nil {
-			needToken = &token
+			matchedToken = &token
 			break
 		}
 	}
-	if needToken == nil {
+	if matchedToken == nil {
 		return "", "", fmt.Errorf("error(RefreshTokens): refresh token not found or invalid")
 	}
-
-	if needToken.Used || time.Now().After(needToken.ExpiresAt) {
-		go sendWebhookAlert(s.webhookURL, needToken.UserID, ip)
-		return "", "", fmt.Errorf("error(RefreshTokens): expired or used token")
+	if matchedToken.Used || time.Now().After(matchedToken.ExpiresAt) {
+		go sendWebhookAlert(s.webhookURL, matchedToken.UserID, ip)
+		return "", "", fmt.Errorf("error(RefreshTokens): token expired or already used")
 	}
-	if needToken.UserAgent != userAgent {
-		_ = s.repository.DeleteTokensByUserID(ctx, needToken.UserID)
-		return "", "", fmt.Errorf("error(RefreshTokens): user agent mismatch")
+	if matchedToken.UserAgent != userAgent {
+		_ = s.repository.DeleteTokensByUserID(ctx, matchedToken.UserID)
+		return "", "", fmt.Errorf("error(RefreshTokens): user agent mismatch - logged out")
 	}
-	if needToken.IPAddress != ip {
-		go sendWebhookAlert(s.webhookURL, needToken.UserID, ip)
+	if matchedToken.IPAddress != ip {
+		go sendWebhookAlert(s.webhookURL, matchedToken.UserID, ip)
 	}
-	_ = s.repository.MarkTokenUsed(ctx, needToken.TokenHash)
-	return s.GenerateTokens(ctx, needToken.UserID, userAgent, ip)
+	if err := s.repository.MarkTokenUsed(ctx, matchedToken.TokenHash); err != nil {
+		return "", "", fmt.Errorf("error(RefreshTokens): failed to mark token used: %w", err)
+	}
+	return s.GenerateTokens(ctx, matchedToken.UserID, userAgent, ip)
 }
 
 func (s *Service) Deauthorize(ctx context.Context, userID string) error {

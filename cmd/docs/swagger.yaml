@@ -1,4 +1,153 @@
+basePath: /
+definitions:
+  auth.MeResponse:
+    properties:
+      user_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+    type: object
+  auth.RefreshRequest:
+    properties:
+      refresh_token:
+        example: d1a4f8a2c7e9f06...
+        type: string
+      user_id:
+        example: 123e4567-e89b-12d3-a456-426614174000
+        type: string
+    type: object
+  auth.TokenResponse:
+    properties:
+      access_token:
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        type: string
+      refresh_token:
+        example: d1a4f8a2c7e9f06...
+        type: string
+    type: object
+host: localhost:8080
 info:
   contact: {}
-paths: {}
+  description: Auth microservice for token generation, refreshing, user identity and
+    logout
+  title: Auth Service API
+  version: "1.0"
+paths:
+  /logout:
+    post:
+      consumes:
+      - application/json
+      description: Deauthorize user by access token
+      parameters:
+      - description: Bearer access_token
+        example: '"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."'
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: error(Logout):missing or invalid Authorization header or invalid
+            token
+          schema:
+            type: string
+        "500":
+          description: error(Logout):failed to logout
+          schema:
+            type: string
+      summary: Logout user
+      tags:
+      - auth
+  /me:
+    get:
+      consumes:
+      - application/json
+      description: Get user_id from Authorization Bearer token
+      parameters:
+      - description: Bearer access_token
+        example: '"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."'
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/auth.MeResponse'
+        "401":
+          description: error(Me):missing or invalid Authorization header or invalid
+            token
+          schema:
+            type: string
+      summary: Get current user ID
+      tags:
+      - auth
+  /refresh:
+    post:
+      consumes:
+      - application/json
+      description: Refresh tokens by sending refresh_token and user_id in JSON body
+      parameters:
+      - description: Refresh token request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/auth.RefreshRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/auth.TokenResponse'
+        "400":
+          description: error(Refresh):invalid request
+          schema:
+            type: string
+        "401":
+          description: error(Refresh):unauthorized
+          schema:
+            type: string
+      summary: Refresh access and refresh tokens
+      tags:
+      - auth
+  /token:
+    post:
+      consumes:
+      - application/json
+      description: Generate tokens for a user by user_id query parameter
+      parameters:
+      - description: User ID
+        example: '"123e4567-e89b-12d3-a456-426614174000"'
+        in: query
+        name: user_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/auth.TokenResponse'
+        "400":
+          description: error(Token):missing user_id
+          schema:
+            type: string
+        "500":
+          description: error(Token):generate tokens
+          schema:
+            type: string
+      summary: Generate access and refresh tokens
+      tags:
+      - auth
+schemes:
+- http
 swagger: "2.0"
