@@ -9,14 +9,14 @@ package main
 
 import (
 	"fmt"
-	"log"
-	"net/http"
+	_ "github.com/Tommych123/auth-service/cmd/docs"
 	"github.com/Tommych123/auth-service/internal/auth"
+	_ "github.com/Tommych123/auth-service/internal/auth"
 	"github.com/Tommych123/auth-service/internal/config"
 	"github.com/Tommych123/auth-service/internal/db"
 	"github.com/swaggo/http-swagger"
-	_ "github.com/Tommych123/auth-service/cmd/docs"
-    _ "github.com/Tommych123/auth-service/internal/auth"
+	"log"
+	"net/http"
 )
 
 func main() {
@@ -28,10 +28,10 @@ func main() {
 	service := auth.NewService(repo, cfg.JWTSecret, cfg.WebhookURL)
 	handler := auth.NewHandler(service)
 
-	http.HandleFunc("/token", handler.Token)       // POST /token?user_id=...
-	http.HandleFunc("/refresh", handler.Refresh)   // POST { user_id, refresh_token }
-	http.HandleFunc("/me", handler.Me)             // GET with token
-	http.HandleFunc("/logout", handler.Logout)     // POST with token
+	http.HandleFunc("/token", handler.Token)     // POST /token?user_id=...
+	http.HandleFunc("/refresh", handler.Refresh) // POST { user_id, refresh_token }
+	http.HandleFunc("/me", handler.Me)           // GET with token
+	http.HandleFunc("/logout", handler.Logout)   // POST with token
 
 	http.Handle("/swagger/", httpSwagger.WrapHandler)
 

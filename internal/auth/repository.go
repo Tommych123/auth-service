@@ -3,8 +3,8 @@ package auth
 import (
 	"context"
 	"database/sql"
-	"time"
 	"fmt"
+	"time"
 )
 
 type Repository struct {

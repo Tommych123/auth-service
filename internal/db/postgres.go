@@ -1,13 +1,12 @@
 package db
 
 import (
-    "database/sql"
-    _ "github.com/lib/pq"
-    "fmt"
-    "github.com/Tommych123/auth-service/internal/config"
-    "log"
+	"database/sql"
+	"fmt"
+	"github.com/Tommych123/auth-service/internal/config"
+	_ "github.com/lib/pq"
+	"log"
 )
-
 
 func NewPostgresDB(cfg *config.Config) *sql.DB {
 	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
