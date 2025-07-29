@@ -11,6 +11,7 @@ import (
 	"github.com/Tommych123/auth-service/api/auth"
 	_ "github.com/Tommych123/auth-service/internal/docs"
 	"github.com/Tommych123/auth-service/pkg/db"
+	_ "github.com/Tommych123/auth-service/repository"
 	"github.com/Tommych123/auth-service/service/config"
 	"github.com/swaggo/http-swagger"
 	"log"

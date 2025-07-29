@@ -1,4 +1,4 @@
-package auth
+package service
 
 import (
 	"bytes"
@@ -12,6 +12,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
 	"time"
+	"github.com/Tommych123/auth-service/repository"
 )
 
 type Service struct {
