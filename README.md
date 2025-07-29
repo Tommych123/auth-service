@@ -27,7 +27,7 @@ Auth Service — это микросервис аутентификации, р�
 1. Клонируйте репозиторий:
 ```bash
 git clone https://github.com/Tommych123/auth-service.git
-cd auth-service/deploy
+cd auth-service
 ```
 2. Создайте в корне проекта(папке auth-service) файл .env, по примеру .env-example:
 
@@ -41,9 +41,9 @@ JWT_SECRET=5110dfc6e34b107f24889c0a94205c50b3be9b69b2954aae00538c58042112d7646ba
 PORT=8080
 WEBHOOK_URL=https://webhook.site/ebca5ae6-0a71-4a22-b5be-272171fdfd79
 ```
-
 3. Запустите сервис:
 ```bash
+cd deploy
 docker-compose -f docker-compose.yml up -d
 ```
 
