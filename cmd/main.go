@@ -1,7 +1,6 @@
 // @title Auth Service API
 // @version 1.0
 // @description Auth microservice for token generation, refreshing, user identity and logout
-// @host localhost:8080
 // @BasePath /
 // @schemes http
 
