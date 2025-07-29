@@ -27,7 +27,7 @@ Auth Service — это микросервис аутентификации, р�
 1. Клонируйте репозиторий:
 ```bash
 git clone https://github.com/Tommych123/auth-service.git
-cd auth-service
+cd auth-service/deploy
 ```
 2. Создайте в корне проекта(папке auth-service) файл .env, по примеру .env-example:
 
@@ -147,15 +147,26 @@ WEBHOOK_URL=http://your-webhook.url/endpoint
 
 ```
 .
-├── cmd/                # Точка входа (main.go)
+├── cmd/                  # Точка входа в приложение (main.go)
+│
+├── api/                 # HTTP-обработчики (handlers), работа с HTTP запросами
+│
+├── service/             # Бизнес-логика (работа с токенами, валидация и т.д.)
+│
+├── repository/          # Работа с базой данных (создание, обновление, удаление refresh токенов и пр.)
+│
+├── pkg/
+│   └── db/              # Инициализация подключения к PostgreSQL
+│
 ├── internal/
-│   ├── auth/           # Логика токенов, обработчики, сервис
-│   ├── db/             # Работа с PostgreSQL
-│   └── config/         # Конфигурация из .env
-├── scripts/            # SQL миграции
-├── Dockerfile
-├── docker-compose.yml
-└── .env
+│   └── docs/            # Swagger-документация
+│
+├── deploy/              # Скрипты и конфиги для запуска: Dockerfile, docker-compose.yml, .env-example, wait-for-it.sh
+│
+├── .gitignore
+├── go.mod
+├── go.sum
+└── README.md
 ```
 
 ---
