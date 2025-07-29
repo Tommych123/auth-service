@@ -3,17 +3,12 @@ package api
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/Tommych123/auth-service/models"
 	"github.com/Tommych123/auth-service/service"
 	"log"
 	"net/http"
 	"strings"
 )
-
-// swagger:model TokenResponse
-type TokenResponse struct {
-	AccessToken  string `json:"access_token" example:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."`
-	RefreshToken string `json:"refresh_token" example:"d1a4f8a2c7e9f06..."`
-}
 
 type RefreshRequest struct {
 	RefreshToken string `json:"refresh_token" example:"d1a4f8a2c7e9f06..."`
@@ -58,7 +53,7 @@ func (h *Handler) Token(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := json.NewEncoder(w).Encode(TokenResponse{
+	if err := json.NewEncoder(w).Encode(models.TokenResponse{
 		AccessToken:  access,
 		RefreshToken: refresh,
 	}); err != nil {
@@ -92,7 +87,7 @@ func (h *Handler) Refresh(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := json.NewEncoder(w).Encode(TokenResponse{
+	if err := json.NewEncoder(w).Encode(models.TokenResponse{
 		AccessToken:  access,
 		RefreshToken: refresh,
 	}); err != nil {
