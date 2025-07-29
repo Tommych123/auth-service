@@ -24,7 +24,6 @@ definitions:
         example: d1a4f8a2c7e9f06...
         type: string
     type: object
-host: localhost:8080
 info:
   contact: {}
   description: Auth microservice for token generation, refreshing, user identity and
