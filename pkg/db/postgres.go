@@ -3,7 +3,7 @@ package db
 import (
 	"database/sql"
 	"fmt"
-	"github.com/Tommych123/auth-service/internal/config"
+	"github.com/Tommych123/auth-service/service/config"
 	_ "github.com/lib/pq"
 	"log"
 )

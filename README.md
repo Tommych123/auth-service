@@ -57,7 +57,6 @@ docker-compose -f docker-compose.yml up -d
 ```
 http://localhost:8080/swagger/index.html
 ```
-(localhost если вы запускаете и swagger и сервер на одной машине, в случае если вы запускаете на разных машинах вам необходимо вместо localhost поставить публичный IP той с которой запущен сервер(например http://158.160.193.209:8080/swagger/index.html где публичный IP - 158.160.193.209))
 
 ### 1. POST `/token?user_id=<UUID>`
 

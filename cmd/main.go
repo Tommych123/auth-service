@@ -8,10 +8,10 @@ package main
 
 import (
 	"fmt"
-	_ "github.com/Tommych123/auth-service/cmd/docs"
-	"github.com/Tommych123/auth-service/internal/auth"
-	"github.com/Tommych123/auth-service/internal/config"
-	"github.com/Tommych123/auth-service/internal/db"
+	"github.com/Tommych123/auth-service/api/auth"
+	_ "github.com/Tommych123/auth-service/internal/docs"
+	"github.com/Tommych123/auth-service/pkg/db"
+	"github.com/Tommych123/auth-service/service/config"
 	"github.com/swaggo/http-swagger"
 	"log"
 	"net/http"
