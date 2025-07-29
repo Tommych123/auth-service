@@ -3,10 +3,10 @@ package api
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/Tommych123/auth-service/service"
 	"log"
 	"net/http"
 	"strings"
-	"github.com/Tommych123/auth-service/service"
 )
 
 // swagger:model TokenResponse

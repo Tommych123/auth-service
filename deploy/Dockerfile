@@ -20,7 +20,7 @@ RUN apk add --no-cache ca-certificates bash
 WORKDIR /root/
 
 COPY --from=builder /app/main .
-COPY wait-for-it.sh .
+COPY deploy/wait-for-it.sh .
 
 EXPOSE 8080
 

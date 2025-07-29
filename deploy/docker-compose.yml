@@ -1,12 +1,14 @@
 services:
   auth_service:
-    build: .
+    build:
+      context: ../
+      dockerfile: deploy/Dockerfile
     depends_on:
       - db
     ports:
       - "8080:8080"
     env_file:
-      - .env
+      - ../.env
 
   db:
     image: postgres:15
@@ -24,7 +26,7 @@ services:
     depends_on:
       - db
     volumes:
-      - ./scripts:/scripts
+      - ../scripts:/scripts
     environment:
       PGPASSWORD: 12345
     entrypoint: >

@@ -8,16 +8,16 @@ package main
 
 import (
 	"fmt"
-	"log"
-	"net/http"
-
 	"github.com/Tommych123/auth-service/api"
 	_ "github.com/Tommych123/auth-service/internal/docs"
 	"github.com/Tommych123/auth-service/pkg/db"
 	"github.com/Tommych123/auth-service/repository"
 	"github.com/Tommych123/auth-service/service"
 	"github.com/Tommych123/auth-service/service/config"
+	"github.com/jmoiron/sqlx"
 	"github.com/swaggo/http-swagger"
+	"log"
+	"net/http"
 )
 
 func enableCors(next http.Handler) http.Handler {
@@ -36,7 +36,8 @@ func enableCors(next http.Handler) http.Handler {
 func main() {
 	cfg := config.LoadEnv()
 	database := db.NewPostgresDB(cfg)
-	repo := repository.NewRepository(database)
+	sqlxDB := sqlx.NewDb(database, "postgres")
+	repo := repository.NewRepository(sqlxDB)
 	service := service.NewService(repo, cfg.JWTSecret, cfg.WebhookURL)
 	handler := api.NewHandler(service)
 	mux := http.NewServeMux()

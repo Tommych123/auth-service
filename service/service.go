@@ -7,12 +7,12 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"github.com/Tommych123/auth-service/repository"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
 	"time"
-	"github.com/Tommych123/auth-service/repository"
 )
 
 type Service struct {
