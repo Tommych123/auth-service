@@ -1,4 +1,4 @@
-#Build
+# Build
 FROM golang:1.24-alpine AS builder
 
 RUN apk add --no-cache git
@@ -12,15 +12,16 @@ COPY . .
 
 RUN CGO_ENABLED=0 GOOS=linux go build -o main ./cmd/main.go
 
-#Run
+# Run
 FROM alpine:latest
 
-RUN apk add --no-cache ca-certificates
+RUN apk add --no-cache ca-certificates bash
 
 WORKDIR /root/
 
 COPY --from=builder /app/main .
+COPY wait-for-it.sh .
 
 EXPOSE 8080
 
-CMD ["./main"]
+CMD ["./wait-for-it.sh", "db", "5432", "--", "./main"]
