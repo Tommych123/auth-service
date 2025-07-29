@@ -29,30 +29,24 @@ func NewService(repository *repository.Repository, jwtSecret string, webhookURL 
 	}
 }
 
-// GenerateTokens создает пару access и refresh токенов, сохраняет refresh токен с хэшем и привязывает tokenID (jti)
 func (s *Service) GenerateTokens(ctx context.Context, userID, userAgent, ip string) (string, string, error) {
 	tokenID := uuid.New().String()
-
 	accessToken, err := s.generateAccessToken(userID, tokenID)
 	if err != nil {
 		return "", "", fmt.Errorf("error(GenerateTokens): generate access token: %w", err)
 	}
-
 	refreshToken, err := generateRandomBase64(32)
 	if err != nil {
 		return "", "", fmt.Errorf("error(GenerateTokens): generate refresh token: %w", err)
 	}
-
 	hashedToken, err := bcrypt.GenerateFromPassword([]byte(refreshToken), bcrypt.DefaultCost)
 	if err != nil {
 		return "", "", fmt.Errorf("error(GenerateTokens): hash refresh token: %w", err)
 	}
-
 	expiresAt := time.Now().Add(7 * 24 * time.Hour)
 	if err := s.repository.SaveRefreshToken(ctx, userID, string(hashedToken), userAgent, ip, expiresAt, tokenID); err != nil {
 		return "", "", fmt.Errorf("error(GenerateTokens): save refresh token: %w", err)
 	}
-
 	return accessToken, refreshToken, nil
 }
 
