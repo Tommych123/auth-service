@@ -147,22 +147,26 @@ WEBHOOK_URL=http://your-webhook.url/endpoint
 
 ```
 .
-├── cmd/                  # Точка входа в приложение (main.go)
 │
 ├── api/                 # HTTP-обработчики (handlers), работа с HTTP запросами
 │
-├── service/             # Бизнес-логика (работа с токенами, валидация и т.д.)
+├── cmd/                 # Точка входа в приложение (main.go)
 │
-├── repository/          # Работа с базой данных (создание, обновление, удаление refresh токенов и пр.)
-│
-├── pkg/
-│   └── db/              # Инициализация подключения к PostgreSQL
+├── deploy/              # Скрипты и конфиги для запуска: Dockerfile, docker-compose.yml, .env-example, wait-for-it.sh
 │
 ├── internal/
 │   └── docs/            # Swagger-документация
 │
-├── deploy/              # Скрипты и конфиги для запуска: Dockerfile, docker-compose.yml, .env-example, wait-for-it.sh
+├── pkg/
+│   └── db/              # Инициализация подключения к PostgreSQL
 │
+├── repository/          # Работа с базой данных (создание, обновление, удаление refresh токенов и пр.)
+│
+├── service/             # Бизнес-логика (работа с токенами, валидация и т.д.)
+│ 
+├── scripts/
+│   └── migrate.sql      # SQL-миграции
+│ 
 ├── .gitignore
 ├── go.mod
 ├── go.sum
