@@ -47,6 +47,7 @@ func (s *Service) GenerateTokens(ctx context.Context, userID, userAgent, ip stri
 	if err := s.repository.SaveRefreshToken(ctx, userID, string(hashedToken), userAgent, ip, expiresAt, tokenID); err != nil {
 		return "", "", fmt.Errorf("error(GenerateTokens): save refresh token: %w", err)
 	}
+
 	return accessToken, refreshToken, nil
 }
 
