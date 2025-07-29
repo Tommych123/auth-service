@@ -16,12 +16,12 @@ import (
 )
 
 type Service struct {
-	repository *Repository
+	repository *repository.Repository
 	jwtSecret  string
 	webhookURL string
 }
 
-func NewService(repository *Repository, jwtSecret string, webhookURL string) *Service {
+func NewService(repository *repository.Repository, jwtSecret string, webhookURL string) *Service {
 	return &Service{
 		repository: repository,
 		jwtSecret:  jwtSecret,
@@ -101,7 +101,7 @@ func (s *Service) RefreshTokens(ctx context.Context, oldRefreshToken, userID, us
 	if err != nil {
 		return "", "", fmt.Errorf("error(RefreshTokens): get tokens failed: %w", err)
 	}
-	var matchedToken *RefreshToken
+	var matchedToken *repository.RefreshToken
 	for _, token := range tokens {
 		if bcrypt.CompareHashAndPassword([]byte(token.TokenHash), []byte(oldRefreshToken)) == nil {
 			matchedToken = &token

@@ -8,14 +8,16 @@ package main
 
 import (
 	"fmt"
-	"github.com/Tommych123/auth-service/api/auth"
-	_ "github.com/Tommych123/auth-service/internal/docs"
-	"github.com/Tommych123/auth-service/pkg/db"
-	_ "github.com/Tommych123/auth-service/repository"
-	"github.com/Tommych123/auth-service/service/config"
-	"github.com/swaggo/http-swagger"
 	"log"
 	"net/http"
+
+	"github.com/Tommych123/auth-service/api"
+	_ "github.com/Tommych123/auth-service/internal/docs"
+	"github.com/Tommych123/auth-service/pkg/db"
+	"github.com/Tommych123/auth-service/repository"
+	"github.com/Tommych123/auth-service/service"
+	"github.com/Tommych123/auth-service/service/config"
+	"github.com/swaggo/http-swagger"
 )
 
 func enableCors(next http.Handler) http.Handler {
@@ -34,9 +36,9 @@ func enableCors(next http.Handler) http.Handler {
 func main() {
 	cfg := config.LoadEnv()
 	database := db.NewPostgresDB(cfg)
-	repo := auth.NewRepository(database)
-	service := auth.NewService(repo, cfg.JWTSecret, cfg.WebhookURL)
-	handler := auth.NewHandler(service)
+	repo := repository.NewRepository(database)
+	service := service.NewService(repo, cfg.JWTSecret, cfg.WebhookURL)
+	handler := api.NewHandler(service)
 	mux := http.NewServeMux()
 	mux.HandleFunc("/token", handler.Token)
 	mux.HandleFunc("/refresh", handler.Refresh)

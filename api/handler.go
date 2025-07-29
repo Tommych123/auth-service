@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"github.com/Tommych123/auth-service/service"
 )
 
 // swagger:model TokenResponse
@@ -24,10 +25,10 @@ type MeResponse struct {
 }
 
 type Handler struct {
-	service *Service
+	service *service.Service
 }
 
-func NewHandler(service *Service) *Handler {
+func NewHandler(service *service.Service) *Handler {
 	return &Handler{service: service}
 }
 
